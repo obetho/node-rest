@@ -7,8 +7,11 @@ const bcrypt = require('bcrypt');
 const _ = require('underscore');
 
 const Usuario = require('../models/usuario');
+
+const { verificaToken, verificaAdminRol } = require('../middleware/authentication');
+
 //obtener datos
-app.get('/usuario', function(req, res) {
+app.get('/usuario', [verificaToken, verificaAdminRol], (req, res) => {
 
     let qry = { estado: true };
     let desde = Number(req.query.desde) || 0;
@@ -37,7 +40,7 @@ app.get('/usuario', function(req, res) {
 });
 
 // POST CREAR Registros
-app.post('/usuario', function(req, res) {
+app.post('/usuario', [verificaToken, verificaAdminRol], function(req, res) {
     let body = req.body;
     let usuario = new Usuario({
         nombre: body.nombre,
@@ -48,7 +51,12 @@ app.post('/usuario', function(req, res) {
 
     usuario.save((err, usuarioDB) => {
         //usuarioDB.password = null;
-
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err
+            });
+        }
         res.json({
             ok: true,
             usuario: usuarioDB
@@ -59,35 +67,34 @@ app.post('/usuario', function(req, res) {
 
 // Put Actualizar datos.
 
-app.put('/usuario/:id', function(req, res) {
+app.put('/usuario/:id', verificaToken, function(req, res) {
     let id = req.params.id;
-    //let body = req.body; //_.pick(req.body, ['nombre', 'email', 'img', 'rol', 'estado']);
+
     let body = _.pick(req.body, ['nombre', 'email', 'img', 'rol', 'estado']);
 
-    //console.log(JSON.stringify(body));
+    console.log(JSON.stringify(body));
 
-    Usuario.findByIdAndUpdate(id, body, { new: true },
-        (err, usuarioDB) => {
+    Usuario.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, usuarioDB) => {
 
-            if (err) {
-                return res.status(400).json({
-                    ok: false,
-                    err
-                });
-            }
-
-            res.json({
-                ok: true,
-                usuario: usuarioDB,
-                id
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err
             });
+        }
+
+        res.json({
+            ok: true,
+            usuario: usuarioDB,
+            id
         });
+    });
 
 
 });
 
 // Delete borrar 
-app.delete('/usuario/:id', function(req, res) {
+app.delete('/usuario/:id', [verificaToken, verificaAdminRol], function(req, res) {
     let id = req.params.id;
     let option = { estado: false };
     // borra el usuario
