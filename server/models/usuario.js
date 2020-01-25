@@ -28,7 +28,7 @@ let usuarioScm = new Schema({
     },
     rol: {
         type: String,
-        default: 'USER_ROLE',
+        default: 'USER_ROL',
         enum: validRol
     },
     estado: {
