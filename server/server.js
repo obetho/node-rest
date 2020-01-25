@@ -31,7 +31,7 @@ app.listen(process.env.PORT, () => {
     console.log(`Escuchando puerto ${ process.env.PORT }`);
 });
 
-mongoose.connect(process.env.URLDB, { useNewUrlParser: true, useCreateIndex: true },
+mongoose.connect(process.env.URLDB, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true, useFindAndModify: false },
     (err) => {
         if (err) throw err;
         console.log('Base de datos online');

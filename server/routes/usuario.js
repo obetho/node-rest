@@ -28,7 +28,7 @@ app.get('/usuario', [verificaToken, verificaAdminRol], (req, res) => {
                     err
                 });
             }
-            Usuario.count(qry, (err, conteo) => {
+            Usuario.countDocuments(qry, (err, conteo) => {
                 res.json({
                     ok: true,
                     cuantos: conteo,
@@ -72,9 +72,7 @@ app.put('/usuario/:id', verificaToken, function(req, res) {
 
     let body = _.pick(req.body, ['nombre', 'email', 'img', 'rol', 'estado']);
 
-    console.log(JSON.stringify(body));
-
-    Usuario.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, usuarioDB) => {
+    Usuario.findByIdAndUpdate(id, body, { new: true, runValidators: true, context: 'query' }, (err, usuarioDB) => {
 
         if (err) {
             return res.status(400).json({
